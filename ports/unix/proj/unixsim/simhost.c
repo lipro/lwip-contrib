@@ -318,22 +318,18 @@ struct netif pppos_netif;
 static void
 pppos_rx_thread(void *arg)
 {
-  int count;
+  u32_t len;
   u8_t buffer[128];
   LWIP_UNUSED_ARG(arg);
 
-  /* Please read the "PPPoS input path" chapter in the
-   * PPP documentation. */
+  /* Please read the "PPPoS input path" chapter in the PPP documentation. */
   while (1) {
-    count = sio_read(ppp_sio, buffer, sizeof(buffer));
-    if(count > 0) {
-      /* Pass received raw characters to PPPoS to be decoded
-       * through lwIP TCPIP thread using the TCPIP API. This
-       * is thread safe in all cases but you should avoid
-       * passing data byte after byte. */
-      pppos_input_tcpip(ppp, buffer, count);
-    } else {
-      sys_msleep(1);
+    len = sio_read(ppp_sio, buffer, sizeof(buffer));
+    if (len > 0) {
+      /* Pass received raw characters from PPPoS to be decoded through lwIP
+       * TCPIP thread using the TCPIP API. This is thread safe in all cases
+       * but you should avoid passing data byte after byte. */
+      pppos_input_tcpip(ppp, buffer, len);
     }
   }
 }
@@ -458,7 +454,6 @@ static void
 init_netifs(void)
 {
 #if PPP_SUPPORT
-  /* ppp_pcb *ppp; */
 #if PPP_PTY_TEST
   ppp_sio = sio_open(2);
 #else
